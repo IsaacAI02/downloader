@@ -1,0 +1,24 @@
+services:
+  - type: worker
+    name: telegram-video-downloader-bot
+    runtime: docker
+    plan: free
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: MAX_UPLOAD_MB
+        value: "49"
+      - key: MAX_CONCURRENT_DOWNLOADS
+        value: "1"
+      - key: DOWNLOAD_TIMEOUT_SECONDS
+        value: "600"
+      - key: NETWORK_TIMEOUT_SECONDS
+        value: "30"
+      - key: DOWNLOAD_DIR
+        value: "downloads"
+      - key: ALLOW_PRIVATE_URLS
+        value: "false"
+      - key: AUDIO_BITRATE_KBPS
+        value: "128"
+      - key: VOICE_BITRATE_KBPS
+        value: "48"
