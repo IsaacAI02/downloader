@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import hashlib
 import logging
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -316,4 +318,24 @@ def run() -> None:
 
     settings.download_dir.mkdir(parents=True, exist_ok=True)
     logger.info("Starting Telegram video downloader bot")
-    build_application(settings).run_polling(allowed_updates=Update.ALL_TYPES)
+    application = build_application(settings)
+
+    webhook_base_url = settings.webhook_url or os.getenv("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
+    if webhook_base_url:
+        webhook_url = f"{webhook_base_url}/{settings.webhook_path}"
+        secret_token = settings.webhook_secret_token or hashlib.sha256(
+            settings.telegram_bot_token.encode("utf-8")
+        ).hexdigest()
+        logger.info("Starting webhook server on port %s", settings.port)
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=settings.port,
+            url_path=settings.webhook_path,
+            webhook_url=webhook_url,
+            secret_token=secret_token,
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True,
+        )
+        return
+
+    application.run_polling(allowed_updates=Update.ALL_TYPES)

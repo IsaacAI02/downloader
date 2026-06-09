@@ -26,6 +26,10 @@ def settings(**overrides: object) -> Settings:
         "audio_bitrate_kbps": 128,
         "voice_bitrate_kbps": 48,
         "ffmpeg_location": None,
+        "webhook_url": None,
+        "webhook_path": "telegram-webhook",
+        "webhook_secret_token": None,
+        "port": 10000,
         "telegram_api_base_url": None,
         "telegram_api_base_file_url": None,
     }

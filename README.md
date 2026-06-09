@@ -58,19 +58,19 @@ docker compose up --build
 
 ## Deploy Online
 
-The project includes a `Dockerfile`, `.dockerignore`, and `render.yaml` so it can run as an always-on worker.
+The project includes a `Dockerfile`, `.dockerignore`, and `render.yaml` so it can run as a Render free web service.
 
-Important: run only one copy of the bot at a time. If your local PC and cloud host both poll Telegram with the same token, Telegram will stop one of them with a conflict error.
+Important: run only one copy of the bot at a time. The Render deployment uses Telegram webhooks; when it is live, stop the local polling bot on your PC.
 
 ### Render
 
 1. Push this repository to GitHub.
 2. Create a new Blueprint on Render and connect the repo.
 3. When Render asks for `TELEGRAM_BOT_TOKEN`, paste your token as a secret value.
-4. Deploy the `telegram-video-downloader-bot` worker.
-5. Stop the local bot after the cloud worker is live.
+4. Deploy the `telegram-video-downloader-bot` web service.
+5. Stop the local bot after the cloud service is live.
 
-The included `render.yaml` uses Render's free worker plan. It is enough for light testing, but downloads can be slow because the free instance has limited CPU/RAM, and video bots can use bandwidth quickly.
+The included `render.yaml` uses Render's free web service plan and webhook mode. It is enough for light testing, but downloads can be slow because the free instance has limited CPU/RAM, and video bots can use bandwidth quickly. Render free web services can spin down after idle time; Telegram should retry webhook delivery when the service wakes up.
 
 Do not upload `.env`; it is ignored by Git and Docker on purpose. For best security, regenerate the token in BotFather before deploying because the original token was shared in chat.
 
@@ -97,6 +97,10 @@ All settings are environment variables, usually stored in `.env`.
 | `AUDIO_BITRATE_KBPS` | `128` | MP3 bitrate for `/audio`. |
 | `VOICE_BITRATE_KBPS` | `48` | OGG/Opus bitrate for `/voice`. |
 | `FFMPEG_LOCATION` | empty | Optional path to ffmpeg if it is not on `PATH`. |
+| `WEBHOOK_URL` | empty | Public base URL for webhook mode. Render normally provides this automatically. |
+| `WEBHOOK_PATH` | `telegram-webhook` | URL path used for Telegram webhook delivery. |
+| `WEBHOOK_SECRET_TOKEN` | empty | Optional Telegram webhook secret; a token-derived secret is used if empty. |
+| `PORT` | `10000` | HTTP port for webhook mode. Render sets this automatically for web services. |
 | `TELEGRAM_API_BASE_URL` | empty | Optional local Bot API base URL. |
 | `TELEGRAM_API_BASE_FILE_URL` | empty | Optional local Bot API file base URL. |
 

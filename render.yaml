@@ -1,11 +1,13 @@
 services:
-  - type: worker
+  - type: web
     name: telegram-video-downloader-bot
     runtime: docker
     plan: free
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: WEBHOOK_PATH
+        value: telegram-webhook
       - key: MAX_UPLOAD_MB
         value: "49"
       - key: MAX_CONCURRENT_DOWNLOADS

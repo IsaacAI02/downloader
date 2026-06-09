@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,6 +32,15 @@ def _bool_env(name: str, default: bool = False) -> bool:
     if raw is None or raw.strip() == "":
         return default
     return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _webhook_path(value: str | None) -> str:
+    path = (value or "telegram-webhook").strip().strip("/")
+    if not path:
+        raise ConfigError("WEBHOOK_PATH cannot be empty.")
+    if not re.fullmatch(r"[A-Za-z0-9._~/-]+", path):
+        raise ConfigError("WEBHOOK_PATH contains unsupported characters.")
+    return path
 
 
 def _owner_ids(value: str | None) -> tuple[int, ...]:
@@ -68,6 +78,10 @@ class Settings:
     audio_bitrate_kbps: int
     voice_bitrate_kbps: int
     ffmpeg_location: str | None
+    webhook_url: str | None
+    webhook_path: str
+    webhook_secret_token: str | None
+    port: int
     telegram_api_base_url: str | None
     telegram_api_base_file_url: str | None
 
@@ -101,6 +115,10 @@ class Settings:
             audio_bitrate_kbps=_int_env("AUDIO_BITRATE_KBPS", 128),
             voice_bitrate_kbps=_int_env("VOICE_BITRATE_KBPS", 48),
             ffmpeg_location=os.getenv("FFMPEG_LOCATION", "").strip() or None,
+            webhook_url=os.getenv("WEBHOOK_URL", "").strip().rstrip("/") or None,
+            webhook_path=_webhook_path(os.getenv("WEBHOOK_PATH")),
+            webhook_secret_token=os.getenv("WEBHOOK_SECRET_TOKEN", "").strip() or None,
+            port=_int_env("PORT", 10000),
             telegram_api_base_url=os.getenv("TELEGRAM_API_BASE_URL", "").strip() or None,
             telegram_api_base_file_url=os.getenv("TELEGRAM_API_BASE_FILE_URL", "").strip() or None,
         )
